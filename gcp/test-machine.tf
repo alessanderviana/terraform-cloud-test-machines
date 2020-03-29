@@ -21,6 +21,11 @@ resource "google_compute_firewall" "allow_ssh_test_machine" {
 
   allow {
     protocol = "tcp"
+    ports = ["3309"]
+  }
+
+  allow {
+    protocol = "tcp"
     ports = ["80"]
   }
 
@@ -56,8 +61,8 @@ resource "google_compute_instance" "test_machine" {
  }
 
   provisioner "file" {
-     source      = "files/haproxy.cfg"
-     destination = "/tmp/haproxy.cfg"
+     source      = "files"
+     destination = "/tmp/files"
 
      connection {
     type        = "ssh"
@@ -67,24 +72,17 @@ resource "google_compute_instance" "test_machine" {
   }
 }
 
-# curl -fsSL https://get.docker.com/ | bash
-# usermod -aG docker ubuntu
+# Teste
+# docker run -it --rm mysql mysql -h10.128.0.12 -P3309 -ualessander -p
 
  metadata_startup_script = <<SCRIPT
-    echo " ******************** INSTALL HAPROXY"
-    add-apt-repository ppa:vbernat/haproxy-1.8
+    echo " ******************** INSTALL DOCKER"
     apt-get update -q
-    apt-get install haproxy -y
-    echo " ******************** CONFIGURE SYSCTL"
-    echo "net.ipv4.ip_forward = 1" | tee -a /etc/sysctl.conf
-    echo "net.ipv4.ip_nonlocal_bind = 1" | tee -a /etc/sysctl.conf
-    sysctl -p
-    echo " ******************** ENABLE INCOMING ON 1521"
-    firewall-cmd --zone=oracle --add-port=1521/tcp
-    firewall-cmd --permanent --zone=oracle --add-port=1521/tcp
-    echo " ******************** ENABLE & START"
-    systemctl enable haproxy
-    systemctl start haproxy
+    curl -fsSL https://get.docker.com/ | bash
+    usermod -aG docker ubuntu
+    echo " ******************** INSTALL DOCKER-COMPOSE"
+    curl -L "https://github.com/docker/compose/releases/download/1.23.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
 SCRIPT
 
 }

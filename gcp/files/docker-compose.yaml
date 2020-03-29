@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  proxy:
+    image: haproxy:2.1-alpine
+    container_name: haproxy
+    volumes:
+      - /tmp/files/haproxy-tcp.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    ports:
+      - '3309:3309'
+    expose:
+      - '3309'
+
+  db:
+    image: mysql:5.7
+    restart: always
+    container_name: mysql
+    environment:
+      MYSQL_DATABASE: 'db'
+      MYSQL_USER: 'alessander'
+      MYSQL_PASSWORD: 'P@ssw0rd'
+      MYSQL_ROOT_PASSWORD: 'P@ssw0rd'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - db-vol:/var/lib/mysql
+
+volumes:
+  db-vol:
